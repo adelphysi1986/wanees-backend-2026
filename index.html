@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upload Image</title>
+</head>
+<body>
+
+  <h2>Upload Image</h2>
+
+  <input type="file" id="imageInput" />
+  <button onclick="uploadImage()">Upload</button>
+
+  <p id="result"></p>
+
+  <script>
+    async function uploadImage() {
+      const fileInput = document.getElementById("imageInput");
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert("اختر صورة");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await fetch("http://localhost:5000/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      document.getElementById("result").innerText = data.url;
+      console.log(data);
+    }
+  </script>
+
+</body>
+</html>
