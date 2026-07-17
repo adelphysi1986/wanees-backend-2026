@@ -18,7 +18,8 @@ const {
   listActivitiesForAdmin,        // ⬅️ جديد
   updateActivityStatusForAdmin,  // ⬅️ جديد
   deleteActivityForAdmin,  getReportByEntity,
-  markActivityAsPaid      // ⬅️ جديد
+  markActivityAsPaid  ,
+  getAdminReportByTrainerCode    // ⬅️ جديد
 } = require('../controllers/adminController');
 
 router.post('/register', registerAdmin);
@@ -42,5 +43,5 @@ router.get('/report', protectAdmin, getReportByEntity);
 router.get('/activities', protectAdmin, listActivitiesForAdmin);
 router.put('/activities/:id/status', protectAdmin, requireRole('full', 'editor'), updateActivityStatusForAdmin);
 router.delete('/activities/:id', protectAdmin, requireRole('full', 'editor'), deleteActivityForAdmin);
-
+router.get('/report-by-code', protectAdmin, getAdminReportByTrainerCode);
 module.exports = router;

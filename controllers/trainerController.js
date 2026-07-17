@@ -1,12 +1,70 @@
 const jwt = require('jsonwebtoken');
 const Trainer = require('../models/Trainer');
 const Activity = require('../models/Activity');
+const User = require('../models/User');
 const generateToken = (trainerId) => {
   return jwt.sign({ id: trainerId }, process.env.JWT_SECRET, {
     expiresIn: '30d',
   });
 };
+exports.getReportByTrainerCode = async (req, res) => {
+  try {
+    const trainerId = req.trainerId;
+    const { from, to } = req.query;
 
+    const trainer = await Trainer.findById(trainerId).select('code');
+
+    if (!trainer || !trainer.code) {
+      return res.status(200).json({
+        success: true,
+        activities: [],
+        totalAmount: 0,
+        platformShare: 0,
+        totalCount: 0,
+      });
+    }
+
+    const usersWithCode = await User.find({ code: trainer.code }).select('_id name');
+    const userIds = usersWithCode.map((u) => u._id);
+
+    if (userIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        activities: [],
+        totalAmount: 0,
+        platformShare: 0,
+        totalCount: 0,
+      });
+    }
+
+    const query = {
+      customer: { $in: userIds },
+      isPaid: true,
+    };
+
+    if (from || to) {
+      query.sessionTime = {};
+      if (from) query.sessionTime.$gte = new Date(from);
+      if (to) query.sessionTime.$lte = new Date(to);
+    }
+
+    const activities = await Activity.find(query).sort({ sessionTime: -1 });
+
+    const totalAmount = activities.reduce((sum, a) => sum + (a.paidAmount || 0), 0);
+    const platformShare = totalAmount * 0.2;
+
+    res.status(200).json({
+      success: true,
+      activities,
+      totalAmount,
+      platformShare,
+      totalCount: activities.length,
+    });
+  } catch (error) {
+    console.error('❌ خطأ بجلب تقرير الكود:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
 exports.getTrainerReport = async (req, res) => {
   try {
 

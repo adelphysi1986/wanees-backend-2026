@@ -433,6 +433,68 @@ exports.listActivitiesForAdmin = async (req, res) => {
     res.status(500).json({ message: 'حدث خطأ أثناء جلب الطلبات', error: error.message });
   }
 };
+
+exports.getAdminReportByTrainerCode = async (req, res) => {
+  try {
+    const { trainerId, from, to } = req.query;
+
+    if (!trainerId) {
+      return res.status(400).json({ message: 'trainerId مطلوب' });
+    }
+
+    const trainer = await Trainer.findById(trainerId).select('code');
+
+    if (!trainer || !trainer.code) {
+      return res.status(200).json({
+        success: true,
+        activities: [],
+        totalAmount: 0,
+        platformShare: 0,
+        totalCount: 0,
+      });
+    }
+
+    const usersWithCode = await User.find({ code: trainer.code }).select('_id');
+    const userIds = usersWithCode.map((u) => u._id);
+
+    if (userIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        activities: [],
+        totalAmount: 0,
+        platformShare: 0,
+        totalCount: 0,
+      });
+    }
+
+    const query = {
+      customer: { $in: userIds },
+      isPaid: true,
+    };
+
+    if (from || to) {
+      query.sessionTime = {};
+      if (from) query.sessionTime.$gte = new Date(from);
+      if (to) query.sessionTime.$lte = new Date(to);
+    }
+
+    const activities = await Activity.find(query).sort({ sessionTime: -1 });
+
+    const totalAmount = activities.reduce((sum, a) => sum + (a.paidAmount || 0), 0);
+    const platformShare = totalAmount * 0.2;
+
+    res.status(200).json({
+      success: true,
+      activities,
+      totalAmount,
+      platformShare,
+      totalCount: activities.length,
+    });
+  } catch (error) {
+    console.error('❌ خطأ بجلب تقرير الكود للأدمن:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
 exports.getReportByEntity = async (req, res) => {
   try {
 

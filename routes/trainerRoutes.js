@@ -9,10 +9,10 @@ const {
   getProfile,
   updateProfile,
   getAllTrainers,
-  getTrainerReport
+  getTrainerReport,getReportByTrainerCode
 } = require('../controllers/trainerController');
 
-
+router.get('/report-by-code', protect, getReportByTrainerCode);
 router.post('/register', registerTrainer);
 router.post('/login', loginTrainer);
 
