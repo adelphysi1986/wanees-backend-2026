@@ -3,15 +3,11 @@ const { getMessaging } = require("firebase-admin/messaging");
 
 let serviceAccount;
 
-if (process.env.FIREBASE_PRIVATE_KEY) {
-    // على الاستضافة (رندر) - بيقرا من متغيرات البيئة
-    serviceAccount = {
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-    };
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    // على رندر - بيقرا كل بيانات الحساب مرة وحدة من متغير بيئة واحد
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 } else {
-    // على جهازك محليًا - بيقرا من الملف زي ما هو
+    // على جهازك - بيقرا الملف زي ما كان دايمًا
     serviceAccount = require("./firebase-service-account.json");
 }
 
