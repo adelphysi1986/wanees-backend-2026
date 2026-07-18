@@ -1,0 +1,4 @@
+git add .gitignore
+git commit -m "منع رفع ملف فايربيس الحساس"
+git push
+
