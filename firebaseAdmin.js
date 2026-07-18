@@ -3,13 +3,17 @@ const { getMessaging } = require("firebase-admin/messaging");
 
 let serviceAccount;
 
-if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    // على رندر - بيقرا كل بيانات الحساب مرة وحدة من متغير بيئة واحد
-    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+    const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, "base64").toString("utf8");
+    serviceAccount = JSON.parse(decoded);
 } else {
-    // على جهازك - بيقرا الملف زي ما كان دايمًا
     serviceAccount = require("./firebase-service-account.json");
 }
+
+console.log("🔑 Firebase project_id:", serviceAccount.project_id);
+console.log("🔑 Firebase client_email:", serviceAccount.client_email);
+console.log("🔑 Firebase private_key_id:", serviceAccount.private_key_id);
+console.log("🔑 private_key length:", serviceAccount.private_key ? serviceAccount.private_key.length : "MISSING");
 
 const app = initializeApp({
     credential: cert(serviceAccount),
