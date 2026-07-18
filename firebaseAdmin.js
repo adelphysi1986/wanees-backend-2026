@@ -13,7 +13,10 @@ if (fs.existsSync(secretFilePath)) {
     // على جهازك محليًا - بيقرا الملف زي ما كان دايمًا
     serviceAccount = require("./firebase-service-account.json");
 }
-
+console.log("🔎 private_key length:", serviceAccount.private_key.length);
+console.log("🔎 private_key start:", JSON.stringify(serviceAccount.private_key.slice(0, 40)));
+console.log("🔎 private_key end:", JSON.stringify(serviceAccount.private_key.slice(-40)));
+console.log("🔎 private_key_id:", serviceAccount.private_key_id);
 const app = initializeApp({
     credential: cert(serviceAccount),
 });
